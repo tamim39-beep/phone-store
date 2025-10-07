@@ -146,3 +146,74 @@ export const addUserHandler = async (req, res) => {
     });
   }
 };
+
+export const updateUserHandler = async (req, res) => {
+  const { id } = req.params;
+  const {
+    fullname,
+    username,
+    email,
+    password,
+    role,
+    address,
+    phone_number,
+    age,
+  } = req.body;
+  try {
+    await pool.query(
+      "UPDATE users SET fullname=?, username=?, email=?, password=?, role=?, address=?, phone_number=?, age=? WHERE id=?",
+      [
+        fullname,
+        username,
+        email,
+        password,
+        role,
+        address,
+        phone_number,
+        age,
+        id,
+      ]
+    );
+
+    const [userUpdate] = await pool.query(
+      "SELECT fullname, username, email, password, role, address, phone_number, age FROM users WHERE id=?",
+      [id]
+    );
+
+    res.status(200).json({
+      status: "success",
+      message: "User Updated successfully",
+      data: userUpdate,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const deleteUserHandler = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [deleteUser] = await pool.query("DELETE FROM users WHERE id = ?", [
+      id,
+    ]);
+
+    if (deleteUser.affectedRows === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+};

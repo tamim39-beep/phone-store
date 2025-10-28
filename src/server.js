@@ -12,8 +12,8 @@ app.use(express.json());
 
 const PORT = 3000;
 
-app.use(userRouter);
-app.use(productRouter);
+app.use("/users", userRouter);
+app.use("/products", productRouter);
 
 app.use(errorMiddleware);
 

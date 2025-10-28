@@ -1,18 +1,18 @@
 import express from "express";
 import {
+  createProductHandler,
+  deleteProductHandler,
   getAllProductsHandler,
   getProductByIdHandler,
-  addProductHandler,
-  updateProductByIdHandler, // ✅ ini nama yang benar
-  deleteProductByIdHandler,
-} from "../handlers/productHandler.js";
+  updateProductHandler,
+} from "../controllers/productController.js";
 
-const productRouter = express.Router();
+const router = express.Router();
 
-productRouter.get("/products", getAllProductsHandler);
-productRouter.get("/products/:id", getProductByIdHandler);
-productRouter.post("/products", addProductHandler);
-productRouter.put("/products/:id", updateProductByIdHandler); // ✅ ganti di sini juga
-productRouter.delete("/products/:id", deleteProductByIdHandler);
+router.get("/", getAllProductsHandler);
+router.get("/:id", getProductByIdHandler);
+router.post("/", createProductHandler);
+router.put("/:id", updateProductHandler);
+router.delete("/:id", deleteProductHandler);
 
-export default productRouter;
+export default router;

@@ -1,14 +1,11 @@
 import express from "express";
 import {
   createUserHandler,
+  deleteUserHandler,
   getAllUsersHandler,
   getUserByIdHandler,
-} from "../controllers/userController.js";
-import {
-  deleteUserHandler,
   updateUserHandler,
-} from "../service/userServices.js";
-
+} from "../controllers/userController.js";
 const userRouter = express.Router();
 
 userRouter.get("/users", getAllUsersHandler);

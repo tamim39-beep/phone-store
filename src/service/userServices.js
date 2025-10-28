@@ -1,112 +1,87 @@
-import { response } from "express";
 import { pool } from "../config/db.js";
 import { ResponseError } from "../errors/responseError.js";
+import { CreateUserSchema } from "../validations/userValidation.js";
+import validate from "../validations/validate.js";
 
-export const getAllUsers = async () => {
+export const getAllUser = async () => {
   const [users] = await pool.query(
-    "SELECT id, username, email, role, address, fullname FROM users"
+    "SELECT id, fullname, username, email, role, address, phone_number, age FROM users"
   );
   return users;
 };
 
 export const getUserById = async (id) => {
   const [users] = await pool.query(
-    "SELECT id, username, email, role, address, fullname FROM users WHERE id = ?",
+    "SELECT id, fullname, username, email, role, address, phone_number, age FROM users WHERE id=?",
     [id]
   );
 
   if (users.length === 0) {
     throw new ResponseError(404, "User not found");
   }
+
   return users[0];
 };
 
-export const createUser = async (userData) => {
-  const { fullname, username, email, password, role, address } = userData;
+export const createUser = async (req) => {
+  const validation = validate(CreateUserSchema, req);
 
-  const [result] = await pool.query(
-    "INSERT INTO users (fullname, username, email, password, role, address) VALUES (?, ?, ?, ?, ?, ?)",
-    [fullname, username, email, password, role, address]
+  console.log(JSON.stringify(validation));
+
+  const { fullname, username, email, password, role } = validation;
+
+  const [users] = await pool.query(
+    "INSERT INTO users (fullname, username, email, password, role) VALUES (?, ?, ?, ?, ?)",
+    [fullname, username, email, password, role]
   );
 
-  return {
-    id: result.insertId,
+  const newUser = {
+    id: users.insertId,
     fullname,
     username,
     email,
-    password,
     role,
-    address,
   };
+
+  return newUser;
 };
 
-export const updateUserHandler = async (req, res) => {
-  const { id } = req.params;
-  const {
+export const updateUser = async (id, req) => {
+  const { fullname, username, email, role, address, phone_number, age } = req;
+
+  await getUserById(id);
+
+  const [result] = await pool.query(
+    "UPDATE users SET fullname=?, username=?, email=?, role=?, address=?, phone_number=?, age=? WHERE id=?",
+    [fullname, username, email, role, address, phone_number, age, id]
+  );
+
+  if (result.affectedRows === 0) {
+    throw new ResponseError(404, "Failed to update user");
+  }
+
+  return {
+    id,
     fullname,
     username,
     email,
-    password,
     role,
     address,
     phone_number,
     age,
-  } = req.body;
-  try {
-    await pool.query(
-      "UPDATE users SET fullname=?, username=?, email=?, password=?, role=?, address=?, phone_number=?, age=? WHERE id=?",
-      [
-        fullname,
-        username,
-        email,
-        password,
-        role,
-        address,
-        phone_number,
-        age,
-        id,
-      ]
-    );
-
-    const [userUpdate] = await pool.query(
-      "SELECT fullname, username, email, password, role, address, phone_number, age FROM users WHERE id=?",
-      [id]
-    );
-
-    res.status(200).json({
-      status: "success",
-      message: "User Updated successfully",
-      data: userUpdate,
-    });
-  } catch (error) {
-    console.error(error);
-  }
+  };
 };
 
-export const deleteUserHandler = async (req, res) => {
-  const { id } = req.params;
+export const deleteUser = async (id) => {
+  await getUserById(id);
 
-  try {
-    const [deleteUser] = await pool.query("DELETE FROM users WHERE id = ?", [
-      id,
-    ]);
+  const [result] = await pool.query("DELETE FROM users WHERE id = ?", [id]);
 
-    if (deleteUser.affectedRows === 0) {
-      return res.status(404).json({
-        status: "fail",
-        message: "User not found",
-      });
-    }
-
-    res.status(200).json({
-      status: "success",
-      message: "User deleted successfully",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      status: "error",
-      message: "Internal server error",
-    });
+  if (result.affectedRows === 0) {
+    throw new ResponseError(404, "Failed to delete user");
   }
+
+  return {
+    message: "User deleted successfully",
+  };
 };

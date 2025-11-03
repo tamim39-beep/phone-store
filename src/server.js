@@ -12,7 +12,7 @@ app.use(express.json());
 
 const PORT = 3000;
 
-app.use("/users", userRouter);
+app.use(userRouter);
 app.use("/products", productRouter);
 
 app.use(errorMiddleware);

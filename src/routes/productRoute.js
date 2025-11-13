@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-router.get("/", getAllProductsHandler);
-router.get("/:id", getProductByIdHandler);
-router.post("/", createProductHandler);
-router.put("/:id", updateProductHandler);
-router.delete("/:id", deleteProductHandler);
+router.get("/products", getAllProductsHandler);
+router.get("/products/:id", getProductByIdHandler);
+router.post("/products", createProductHandler);
+router.put("/products/:id", updateProductHandler);
+router.delete("/products/:id", deleteProductHandler);
 
 export default router;
